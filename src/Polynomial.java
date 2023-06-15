@@ -1,42 +1,86 @@
-import javax.lang.model.util.ElementScanner14;
 
 public class Polynomial {
     PolyUnit polyUnit = new PolyUnit(0,0);
 
-    public void addPolyUnit(PolyUnit polyUnit) {
-        if (this.polyUnit == null) 
+
+    public Polynomial() 
+    {
+        this.polyUnit = new PolyUnit(0,0);
+    }
+
+    public void addPolyUnit(int coefficient, int exponent) 
+    {
+        addPolyUnit(new PolyUnit(coefficient, exponent));
+    }
+
+    public void addPolyUnit(PolyUnit polyUnit) 
+    {
+        if (polyUnit == null)
         {
-            this.polyUnit = polyUnit;
+            System.out.println("polyUnit is null");
             return;
         }
-        PolyUnit temp = this.polyUnit;
-        if (temp.exponent == polyUnit.exponent) 
+        if (polyUnit.exponent == 0)
         {
-            System.out.println("Exponent already exists");
+            this.polyUnit.coefficient += polyUnit.coefficient;
             return;
         }
-        else if (temp.exponent > polyUnit.exponent) 
+        if (polyUnit.exponent > 0)
         {
-            if (temp.next.exponent < polyUnit.exponent)
+            while(true)
             {
-                temp = setUnitToMiddle(temp, polyUnit);
-                temp = goto0(temp);
-                this.polyUnit = temp;
-                return;
+                if (this.polyUnit.exponent == polyUnit.exponent)
+                {
+                    this.polyUnit.coefficient += polyUnit.coefficient;
+                    break;
+                }
+                if (this.polyUnit.prev == null)
+                {
+                    addPolyUnitToFront(new PolyUnit(0, this.polyUnit.exponent + 1), this.polyUnit);
+                }
+                this.polyUnit = this.polyUnit.prev;
             }
-            
         }
-        else if (temp.exponent < polyUnit.exponent)
+        if (polyUnit.exponent < 0)
+        {
+            while(true)
+            {
+                if (this.polyUnit.exponent == polyUnit.exponent)
+                {
+                    this.polyUnit.coefficient += polyUnit.coefficient;
+                    break;
+                }
+                if (this.polyUnit.next == null)
+                {
+                    addPolyUnitToBack(this.polyUnit, new PolyUnit(0, this.polyUnit.exponent - 1));
+                }
+                this.polyUnit = this.polyUnit.next;
+            }
+        }
+        this.polyUnit = goto0(this.polyUnit);
         
     }
 
-    private PolyUnit setUnitToMiddle(PolyUnit front, PolyUnit middle)
-    {   
-        middle.prev = front;
-        middle.next = front.next;
-        front.next.prev = middle;
-        front.next = middle;
-        return front;
+    private void addPolyUnitToFront(PolyUnit frontPolyUnit, PolyUnit nowPolyUnit)
+    {
+        if (frontPolyUnit == null)
+        {
+            System.out.println("polyUnit is null");
+            return;
+        }
+        nowPolyUnit.prev = frontPolyUnit;
+        frontPolyUnit.next = nowPolyUnit;
+    }
+
+    private void addPolyUnitToBack(PolyUnit nowPolyUnit, PolyUnit backPolyUnit)
+    {
+        if (backPolyUnit == null)
+        {
+            System.out.println("polyUnit is null");
+            return;
+        }
+        nowPolyUnit.next = backPolyUnit;
+        backPolyUnit.prev = nowPolyUnit;
     }
 
     private PolyUnit goto0(PolyUnit polyUnit)
@@ -58,6 +102,54 @@ public class Polynomial {
             System.out.println("goto0 has an error");
             return null;
         }
+    }
+
+    private PolyUnit gotoFront(PolyUnit polyUnit)
+    {
+        if (polyUnit.prev == null)
+        {
+            return polyUnit;
+        }
+        else
+        {
+            return gotoFront(polyUnit.prev);
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        String result = "";
+        PolyUnit polyUnit = gotoFront(this.polyUnit);
+        while(true)
+        {
+            if (polyUnit.coefficient == 0);
+            else if (polyUnit.exponent > 0)
+            {
+                result += polyUnit.coefficient + "x^" + polyUnit.exponent;
+            }
+            else if (polyUnit.exponent == 0)
+            {
+                result += polyUnit.coefficient + "";
+            }
+            else if (polyUnit.exponent < 0)
+            {
+                result += polyUnit.coefficient + "x^(" + polyUnit.exponent + ")";
+            }
+            else
+            {
+                System.out.println("toString has an error");
+                break;
+            }
+            if (polyUnit.next == null)
+            {
+                break;
+            }
+            polyUnit = polyUnit.next;
+            if (polyUnit.coefficient != 0) result += " + ";
+            
+        }
+        return result;
     }
 
 
