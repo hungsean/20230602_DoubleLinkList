@@ -1,3 +1,4 @@
+import javax.lang.model.util.ElementScanner14;
 
 public class Polynomial {
     PolyUnit polyUnit = new PolyUnit(0,0);
@@ -6,6 +7,146 @@ public class Polynomial {
     public Polynomial() 
     {
         this.polyUnit = new PolyUnit(0,0);
+    }
+
+    public Polynomial add(Polynomial polynomial1, Polynomial polynomial2)
+    {
+        PolyUnit polyUnit1 = polynomial1.gotoFront();
+        PolyUnit polyUnit2 = polynomial2.gotoFront();
+        Polynomial result = new Polynomial();
+        while(true)
+        {
+            if (polyUnit1.exponent > polyUnit2.exponent)
+            {
+                if (polyUnit1.next == null && polyUnit2.next != null)
+                {
+                    result.addPolyUnit(polyUnit2.coefficient, polyUnit2.exponent);
+                    polyUnit2 = polyUnit2.next;
+                }
+                else if (polyUnit2.next == null)
+                {
+                    result.addPolyUnit(polyUnit2.coefficient, polyUnit2.exponent);
+                    break;
+                }
+                else 
+                {
+                    result.addPolyUnit(polyUnit1.coefficient, polyUnit1.exponent);
+                    polyUnit1 = polyUnit1.next;
+                }
+            }
+            else if (polyUnit1.exponent == polyUnit2.exponent)
+            {
+                result.addPolyUnit(polyUnit1.coefficient + polyUnit2.coefficient, polyUnit1.exponent);
+                if (polyUnit1.next == null && polyUnit2.next != null)
+                {
+                    polyUnit2 = polyUnit2.next;
+                }
+                else if (polyUnit1.next != null && polyUnit2.next == null)
+                {
+                    polyUnit1 = polyUnit1.next;
+                }
+                else if (polyUnit1.next == null && polyUnit2.next == null)
+                {
+                    break;
+                }
+                else 
+                {
+                    polyUnit1 = polyUnit1.next;
+                    polyUnit2 = polyUnit2.next;
+                }
+            }
+            else if (polyUnit1.exponent < polyUnit2.exponent)
+            {
+                if (polyUnit1.next != null && polyUnit2.next == null)
+                {
+                    result.addPolyUnit(polyUnit1.coefficient, polyUnit1.exponent);
+                    polyUnit1 = polyUnit1.next;
+                }
+                else if (polyUnit1.next == null)
+                {
+                    result.addPolyUnit(polyUnit1.coefficient, polyUnit1.exponent);
+                    break;
+                }
+                else 
+                {
+                    result.addPolyUnit(polyUnit2.coefficient, polyUnit2.exponent);
+                    polyUnit2 = polyUnit2.next;
+                }
+
+            }
+        }
+        return result;
+
+    }
+
+    public Polynomial multiply(Polynomial polynomial1, Polynomial polynomial2)
+    {
+        PolyUnit polyUnit1 = polynomial1.gotoFront();
+        PolyUnit polyUnit2 = polynomial2.gotoFront();
+        Polynomial result = new Polynomial();
+        while(true)
+        {
+            if (polyUnit1.exponent > polyUnit2.exponent)
+            {
+                if (polyUnit1.next == null && polyUnit2.next != null)
+                {
+                    result.addPolyUnit(-polyUnit2.coefficient, polyUnit2.exponent);
+                    polyUnit2 = polyUnit2.next;
+                }
+                else if (polyUnit2.next == null)
+                {
+                    result.addPolyUnit(-polyUnit2.coefficient, polyUnit2.exponent);
+                    break;
+                }
+                else 
+                {
+                    result.addPolyUnit(polyUnit1.coefficient, polyUnit1.exponent);
+                    polyUnit1 = polyUnit1.next;
+                }
+            }
+            else if (polyUnit1.exponent == polyUnit2.exponent)
+            {
+                result.addPolyUnit(polyUnit1.coefficient - polyUnit2.coefficient, polyUnit1.exponent);
+                if (polyUnit1.next == null && polyUnit2.next != null)
+                {
+                    polyUnit2 = polyUnit2.next;
+                }
+                else if (polyUnit1.next != null && polyUnit2.next == null)
+                {
+                    polyUnit1 = polyUnit1.next;
+                }
+                else if (polyUnit1.next == null && polyUnit2.next == null)
+                {
+                    break;
+                }
+                else 
+                {
+                    polyUnit1 = polyUnit1.next;
+                    polyUnit2 = polyUnit2.next;
+                }
+            }
+            else if (polyUnit1.exponent < polyUnit2.exponent)
+            {
+                if (polyUnit1.next != null && polyUnit2.next == null)
+                {
+                    result.addPolyUnit(polyUnit1.coefficient, polyUnit1.exponent);
+                    polyUnit1 = polyUnit1.next;
+                }
+                else if (polyUnit1.next == null)
+                {
+                    result.addPolyUnit(polyUnit1.coefficient, polyUnit1.exponent);
+                    break;
+                }
+                else 
+                {
+                    result.addPolyUnit(-polyUnit2.coefficient, polyUnit2.exponent);
+                    polyUnit2 = polyUnit2.next;
+                }
+
+            }
+        }
+        return result;
+
     }
 
     public void addPolyUnit(int coefficient, int exponent) 
@@ -83,6 +224,11 @@ public class Polynomial {
         backPolyUnit.prev = nowPolyUnit;
     }
 
+    private PolyUnit goto0()
+    {
+        return goto0(this.polyUnit);
+    }
+
     private PolyUnit goto0(PolyUnit polyUnit)
     {
         if (polyUnit.exponent > 0)
@@ -102,6 +248,11 @@ public class Polynomial {
             System.out.println("goto0 has an error");
             return null;
         }
+    }
+
+    private PolyUnit gotoFront()
+    {
+        return gotoFront(this.polyUnit);
     }
 
     private PolyUnit gotoFront(PolyUnit polyUnit)
@@ -126,15 +277,24 @@ public class Polynomial {
             if (polyUnit.coefficient == 0);
             else if (polyUnit.exponent > 0)
             {
-                result += polyUnit.coefficient + "x^" + polyUnit.exponent;
+                if (polyUnit.coefficient < 0)
+                    result += "(" + polyUnit.coefficient + ")x^" + polyUnit.exponent;
+                else
+                    result += polyUnit.coefficient + "x^" + polyUnit.exponent;
             }
             else if (polyUnit.exponent == 0)
             {
-                result += polyUnit.coefficient + "";
+                if (polyUnit.coefficient < 0)
+                    result += "(" + polyUnit.coefficient + ")";
+                else
+                    result += polyUnit.coefficient;
             }
             else if (polyUnit.exponent < 0)
             {
-                result += polyUnit.coefficient + "x^(" + polyUnit.exponent + ")";
+                if (polyUnit.coefficient < 0)
+                    result += "(" + polyUnit.coefficient + ")x^(" + polyUnit.exponent + ")";
+                else
+                    result += polyUnit.coefficient + "x^(" + polyUnit.exponent + ")";
             }
             else
             {
